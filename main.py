@@ -99,6 +99,25 @@ async def cafe_alert(interaction: discord.Interaction, channel: discord.TextChan
         view=MenuView(menus, guild_id),
         ephemeral=True
     )
+@tree.command(name="메뉴설정", description="메뉴 선택 변경")
+async def menu_setting(interaction: discord.Interaction):
+    guild_id = str(interaction.guild_id)
+
+    res = supabase.table("cafe_config").select("*").eq("guild_id", guild_id).execute()
+
+    if not res.data:
+        await interaction.response.send_message("먼저 `/카페알림`으로 카페를 설정해주세요", ephemeral=True)
+        return
+
+    cafe_id = res.data[0]["cafe_id"]
+
+    menus = await fetch_menus(cafe_id)
+
+    await interaction.response.send_message(
+        "메뉴 다시 선택:",
+        view=MenuView(menus, guild_id),
+        ephemeral=True
+    )
 
 
 async def main_task():
